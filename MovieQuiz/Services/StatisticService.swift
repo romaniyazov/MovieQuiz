@@ -5,7 +5,7 @@ final class StatisticService: StatisticServiceProtocol {
     private let userDefaults = UserDefaults.standard
 
     var gamesCount: Int {
-        return userDefaults.integer(forKey: Keys.gamesCount.rawValue)
+        userDefaults.integer(forKey: Keys.gamesCount.rawValue)
     }
 
     var bestGame: GameResult? {
@@ -46,11 +46,11 @@ final class StatisticService: StatisticServiceProtocol {
             userDefaults.set(encoded, forKey: Keys.bestGame.rawValue)
         }
     }
-}
-
-private enum Keys: String {
-    case gamesCount
-    case bestGame
-    case totalCorrect
-    case totalQuestions
+    
+    private enum Keys: String {
+        case gamesCount
+        case bestGame
+        case totalCorrect
+        case totalQuestions
+    }
 }
