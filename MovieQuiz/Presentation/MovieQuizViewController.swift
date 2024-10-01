@@ -7,6 +7,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     @IBOutlet private weak var imageView: UIImageView!
     @IBOutlet private weak var noButton: UIButton!
     @IBOutlet private weak var yesButton: UIButton!
+    @IBOutlet private weak var activityIndicator: UIActivityIndicatorView!
     
     private var currentQuestionIndex = 0
     private var correctAnswers = 0
@@ -22,13 +23,13 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        let questionFactory = QuestionFactory()
-        questionFactory.delegate = self
+        let questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
         self.questionFactory = questionFactory
         
         alertPresenter = AlertPresenter(for: self)
         
-        questionFactory.requestNextQuestion()
+        questionFactory.loadData()
+        showActivityIndicator()
     }
     
     // MARK: - QuestionFactoryDelegate
@@ -42,7 +43,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     }
     
     private func convert(model: QuizQuestion) -> QuizStepViewModel {
-        QuizStepViewModel(image: UIImage(named: model.image) ?? UIImage(),
+        QuizStepViewModel(image: UIImage(data: model.image) ?? UIImage(),
                           question: model.text,
                           questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)")
     }
@@ -110,6 +111,44 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
             """
         }
         return message
+    }
+    
+    func didLoadDataFromServer() {
+        questionFactory?.requestNextQuestion()
+        hideActivityIndicator()
+    }
+    
+    func didFailToLoadData(with error: any Error) {
+        showNetworkError(error.localizedDescription)
+    }
+    
+    private func showNetworkError(_ description: String) {
+        hideActivityIndicator()
+        
+        let alert = AlertModel(
+            title: "Не получилось загрузить вопросы",
+            message: description,
+            buttonText: "Попробовать ещё раз") { [weak self] in
+                guard let self else { return }
+                
+                self.currentQuestionIndex = 0
+                self.correctAnswers = 0
+                
+                self.showActivityIndicator()
+                self.questionFactory?.loadData()
+            }
+
+        alertPresenter?.present(alert: alert)
+    }
+    
+    private func showActivityIndicator() {
+        activityIndicator.isHidden = false
+        activityIndicator.startAnimating()
+    }
+    
+    private func hideActivityIndicator() {
+        activityIndicator.stopAnimating()
+        activityIndicator.isHidden = true
     }
     
     @IBAction private func noButtonPressed(_ sender: Any) {

@@ -117,6 +117,19 @@
                                     <constraint firstAttribute="trailing" secondItem="Avd-9T-H8f" secondAttribute="trailing" id="uEv-U7-rwv"/>
                                 </constraints>
                             </stackView>
+                            <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" style="large" translatesAutoresizingMaskIntoConstraints="NO" id="E2q-an-hxs">
+                                <rect key="frame" x="164.66666666666666" y="394" width="64" height="64"/>
+                                <color key="backgroundColor" name="YP Background"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="64" id="WsM-AA-iSG"/>
+                                    <constraint firstAttribute="height" constant="64" id="Zbd-pt-3Ml"/>
+                                </constraints>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                        <integer key="value" value="10"/>
+                                    </userDefinedRuntimeAttribute>
+                                </userDefinedRuntimeAttributes>
+                            </activityIndicatorView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" name="YP Black"/>
@@ -124,10 +137,13 @@
                             <constraint firstItem="Jds-o9-EDQ" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="20" id="PIi-LX-i5o"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="Jds-o9-EDQ" secondAttribute="bottom" id="gxT-Cb-dJ7"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="Jds-o9-EDQ" secondAttribute="trailing" constant="20" id="jpz-sU-1DH"/>
+                            <constraint firstItem="E2q-an-hxs" firstAttribute="centerY" secondItem="8bC-Xf-vdC" secondAttribute="centerY" id="lov-15-sFl"/>
                             <constraint firstItem="Jds-o9-EDQ" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="10" id="qgi-Ul-AQh"/>
+                            <constraint firstItem="E2q-an-hxs" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="ze5-DC-sGf"/>
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="activityIndicator" destination="E2q-an-hxs" id="1RS-fW-CKj"/>
                         <outlet property="counterLabel" destination="zeT-5X-K1R" id="6li-Vd-Gl6"/>
                         <outlet property="imageView" destination="Fag-b4-Bvd" id="PV4-09-UdM"/>
                         <outlet property="noButton" destination="bLk-Tg-K3r" id="lT3-1E-Db0"/>
@@ -142,6 +158,9 @@
     </scenes>
     <resources>
         <image name="The Ice Age Adventures of Buck Wild" width="640" height="949"/>
+        <namedColor name="YP Background">
+            <color red="0.10196078431372549" green="0.10588235294117647" blue="0.13333333333333333" alpha="0.60000002384185791" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
         <namedColor name="YP Black">
             <color red="0.10196078431372549" green="0.10588235294117647" blue="0.13333333333333333" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
