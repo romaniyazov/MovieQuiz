@@ -88,8 +88,10 @@ final class MovieQuizUITests: XCTestCase {
         XCTAssertEqual("Сыграть ещё раз", button.label)
         
         button.tap()
-        sleep(3)
-            
+        sleep(delay)
+
+        XCTAssertEqual(app.alerts.count, 0)
+
         let index = app.staticTexts["Index"]
         XCTAssertTrue(index.exists)
         XCTAssertEqual(index.label, "1/10")
