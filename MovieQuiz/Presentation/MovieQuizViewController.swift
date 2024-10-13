@@ -28,6 +28,8 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         
         alertPresenter = AlertPresenter(for: self)
         
+        activityIndicator.hidesWhenStopped = true
+        
         questionFactory.loadData()
         showActivityIndicator()
     }
@@ -38,6 +40,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         currentQuestion = question
         let viewModel = convert(model: question)
         DispatchQueue.main.async { [weak self] in
+            self?.hideActivityIndicator()
             self?.show(quiz: viewModel)
         }
     }
@@ -84,7 +87,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
             ))
         } else {
             currentQuestionIndex += 1
-            self.questionFactory?.requestNextQuestion()
+            self.requestNextQuestion()
         }
     }
     
@@ -93,7 +96,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
             guard let self else { return }
             self.currentQuestionIndex = 0
             self.correctAnswers = 0
-            questionFactory?.requestNextQuestion()
+            requestNextQuestion()
         }
         let alert = AlertModel(title: result.title, message: result.text, buttonText: result.buttonText, completion: action)
         alertPresenter?.present(alert: alert)
@@ -113,9 +116,13 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         return message
     }
     
-    func didLoadDataFromServer() {
+    func requestNextQuestion() {
+        showActivityIndicator()
         questionFactory?.requestNextQuestion()
-        hideActivityIndicator()
+    }
+    
+    func didLoadDataFromServer() {
+        requestNextQuestion()
     }
     
     func didFailToLoadData(with error: any Error) {
@@ -142,13 +149,11 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     }
     
     private func showActivityIndicator() {
-        activityIndicator.isHidden = false
         activityIndicator.startAnimating()
     }
     
     private func hideActivityIndicator() {
         activityIndicator.stopAnimating()
-        activityIndicator.isHidden = true
     }
     
     @IBAction private func noButtonPressed(_ sender: Any) {

@@ -1,6 +1,6 @@
 import Foundation
 
-class QuestionFactory: QuestionFactoryProtocol {
+final class QuestionFactory: QuestionFactoryProtocol {
     
     private let moviesLoader: MoviesLoading
     private weak var delegate: QuestionFactoryDelegate?
@@ -56,6 +56,11 @@ class QuestionFactory: QuestionFactoryProtocol {
                 imageData = try Data(contentsOf: movie.imageURL)
             } catch {
                 print("Could not load image by url: \(movie.imageURL)")
+                DispatchQueue.main.async { [weak self] in
+                    guard let self else { return }
+                    self.delegate?.didFailToLoadData(with: error)
+                }
+                return
             }
             let rating = Float(movie.rating) ?? 0
 
@@ -74,7 +79,7 @@ class QuestionFactory: QuestionFactoryProtocol {
     func loadData() {
         moviesLoader.loadMovies { [weak self] result in
             DispatchQueue.main.async {
-                guard let self = self else { return }
+                guard let self else { return }
                 switch result {
                 case .success(let newMovies):
                     self.movies.append(contentsOf: newMovies.items)
@@ -83,6 +88,17 @@ class QuestionFactory: QuestionFactoryProtocol {
                     self.delegate?.didFailToLoadData(with: error)
                 }
             }
+        }
+    }
+}
+
+enum QuestionError: LocalizedError {
+    case loadImageError
+    
+    public var failureReason: String? {
+        switch self {
+        case .loadImageError:
+            "Failed to load image"
         }
     }
 }
