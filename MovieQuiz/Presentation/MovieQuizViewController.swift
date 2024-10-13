@@ -7,6 +7,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     @IBOutlet private weak var imageView: UIImageView!
     @IBOutlet private weak var noButton: UIButton!
     @IBOutlet private weak var yesButton: UIButton!
+    @IBOutlet private weak var activityIndicator: UIActivityIndicatorView!
     
     private var currentQuestionIndex = 0
     private var correctAnswers = 0
@@ -22,13 +23,15 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        let questionFactory = QuestionFactory()
-        questionFactory.delegate = self
+        let questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
         self.questionFactory = questionFactory
         
         alertPresenter = AlertPresenter(for: self)
         
-        questionFactory.requestNextQuestion()
+        activityIndicator.hidesWhenStopped = true
+        
+        questionFactory.loadData()
+        showActivityIndicator()
     }
     
     // MARK: - QuestionFactoryDelegate
@@ -37,12 +40,13 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         currentQuestion = question
         let viewModel = convert(model: question)
         DispatchQueue.main.async { [weak self] in
+            self?.hideActivityIndicator()
             self?.show(quiz: viewModel)
         }
     }
     
     private func convert(model: QuizQuestion) -> QuizStepViewModel {
-        QuizStepViewModel(image: UIImage(named: model.image) ?? UIImage(),
+        QuizStepViewModel(image: UIImage(data: model.image) ?? UIImage(),
                           question: model.text,
                           questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)")
     }
@@ -83,7 +87,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
             ))
         } else {
             currentQuestionIndex += 1
-            self.questionFactory?.requestNextQuestion()
+            self.requestNextQuestion()
         }
     }
     
@@ -92,7 +96,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
             guard let self else { return }
             self.currentQuestionIndex = 0
             self.correctAnswers = 0
-            questionFactory?.requestNextQuestion()
+            requestNextQuestion()
         }
         let alert = AlertModel(title: result.title, message: result.text, buttonText: result.buttonText, completion: action)
         alertPresenter?.present(alert: alert)
@@ -110,6 +114,46 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
             """
         }
         return message
+    }
+    
+    func requestNextQuestion() {
+        showActivityIndicator()
+        questionFactory?.requestNextQuestion()
+    }
+    
+    func didLoadDataFromServer() {
+        requestNextQuestion()
+    }
+    
+    func didFailToLoadData(with error: any Error) {
+        showNetworkError(error.localizedDescription)
+    }
+    
+    private func showNetworkError(_ description: String) {
+        hideActivityIndicator()
+        
+        let alert = AlertModel(
+            title: "Не получилось загрузить вопросы",
+            message: description,
+            buttonText: "Попробовать ещё раз") { [weak self] in
+                guard let self else { return }
+                
+                self.currentQuestionIndex = 0
+                self.correctAnswers = 0
+                
+                self.showActivityIndicator()
+                self.questionFactory?.loadData()
+            }
+
+        alertPresenter?.present(alert: alert)
+    }
+    
+    private func showActivityIndicator() {
+        activityIndicator.startAnimating()
+    }
+    
+    private func hideActivityIndicator() {
+        activityIndicator.stopAnimating()
     }
     
     @IBAction private func noButtonPressed(_ sender: Any) {
