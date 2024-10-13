@@ -70,11 +70,13 @@ final class MovieQuizUITests: XCTestCase {
     }
     
     func testEndGameAlert() {
-        sleep(3)
+        let delay: UInt32 = 4
+        
+        sleep(delay)
         
         for _ in 1...10 {
             app.buttons["No"].tap()
-            sleep(3)
+            sleep(delay)
         }
         
         let alert = app.alerts.firstMatch
